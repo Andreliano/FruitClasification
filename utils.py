@@ -3,6 +3,8 @@ import numpy as np
 from PIL import Image
 import matplotlib.patches as mpatches
 import os
+import tensorflow as tf
+from tensorflow import keras
 
 from matplotlib import pyplot as plt
 
@@ -37,7 +39,7 @@ def loadImageData(path):
     inputs = []
     outputs = []
     for subdirectory in os.listdir(path):
-        for img_name in os.listdir(f'{path}/{subdirectory}')[:20]:
+        for img_name in os.listdir(f'{path}/{subdirectory}')[:5]:
             if img_name.endswith("jpg"):
                 print(subdirectory, img_name)
                 imgNormal = Image.open(f'{path}/{subdirectory}/{img_name}')
@@ -62,6 +64,7 @@ def split_data(inputs, outputs):
 
     return train_inputs, train_outputs, test_inputs, test_outputs
 
+
 def convertPixelsMatrixIntoGrayScaleArray(inputs):
     gray_arrays = []
     for pixels in inputs:
@@ -70,6 +73,7 @@ def convertPixelsMatrixIntoGrayScaleArray(inputs):
         gray_array = np.reshape(np.asarray(img.getdata()), -1)
         gray_arrays.append(gray_array)
     return np.asarray(gray_arrays)
+
 
 def get_mean_and_standard_deviation(data):
     mean = sum(data) / len(data)
@@ -109,6 +113,42 @@ def normalisation(train_inputs, test_inputs, number_of_features):
             features_normalized.append(normalized_value)
         test_inputs_normalized.append(features_normalized)
     return train_inputs_normalized, test_inputs_normalized
+
+
+def createModel():
+    model = tf.keras.Sequential([
+        keras.layers.Reshape((224, 224, 3), input_shape=(50176, 3)),
+        keras.layers.Conv2D(32, (3, 3), activation='relu'),
+        keras.layers.MaxPooling2D((2, 2)),
+        keras.layers.Conv2D(64, (3, 3), activation='relu'),
+        keras.layers.MaxPooling2D((2, 2)),
+        keras.layers.Flatten(),
+        keras.layers.Dense(64, activation='relu'),
+        keras.layers.Dense(16, activation='softmax')
+    ])
+    model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+    return model
+
+
+def training(classifier, trainInputsNormalized, trainOutputs):
+    classifier.fit(trainInputsNormalized, trainOutputs)
+    return classifier
+
+def classification(classifier, validationInputsNormalized):
+    computedValidationOutputs = classifier.predict(validationInputsNormalized)
+    return computedValidationOutputs
+
+def evalMultiClass(realLabels, computedLabels, labelNames):
+    from sklearn.metrics import confusion_matrix
+
+    confMatrix = confusion_matrix(realLabels, computedLabels, labels=labelNames)
+    acc = sum([confMatrix[i][i] for i in range(len(labelNames))]) / len(realLabels)
+    precision = {}
+    recall = {}
+    for i in range(len(labelNames)):
+        precision[labelNames[i]] = confMatrix[i][i] / (sum([confMatrix[j][i] for j in range(len(labelNames))]) + 1e-9)
+        recall[labelNames[i]] = confMatrix[i][i] / (sum([confMatrix[i][j] for j in range(len(labelNames))]) + 1e-9)
+    return acc, precision, recall, confMatrix
 
 
 def plot_histogram(outputs, histogram_name):

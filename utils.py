@@ -1,3 +1,5 @@
+import itertools
+
 import pandas as pd
 import numpy as np
 from PIL import Image
@@ -163,4 +165,27 @@ def plot_histogram(outputs, histogram_name):
     plt.xlabel('Label')
     plt.ylabel('Frequency')
     plt.xticks(range(len(outputs_labels)), labels=[f'{i}' for label, i in output_to_index.items()])
+    plt.show()
+
+
+def plotConfusionMatrix(cm, class_names, title):
+    plt.figure()
+    plt.imshow(cm, interpolation='nearest', cmap='Blues')
+    plt.title('Confusion Matrix ' + title)
+    plt.colorbar()
+    tick_marks = np.arange(len(class_names))
+    plt.xticks(tick_marks, class_names, rotation=45)
+    plt.yticks(tick_marks, class_names)
+
+    text_format = 'd'
+    thresh = cm.max() / 2.
+    for row, column in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+        plt.text(column, row, format(cm[row, column], text_format),
+                 horizontalalignment='center',
+                 color='white' if cm[row, column] > thresh else 'black')
+
+    plt.ylabel('True label')
+    plt.xlabel('Predicted label')
+    plt.tight_layout()
+
     plt.show()

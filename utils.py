@@ -136,9 +136,11 @@ def training(classifier, trainInputsNormalized, trainOutputs):
     classifier.fit(trainInputsNormalized, trainOutputs)
     return classifier
 
+
 def classification(classifier, validationInputsNormalized):
     computedValidationOutputs = classifier.predict(validationInputsNormalized)
     return computedValidationOutputs
+
 
 def evalMultiClass(realLabels, computedLabels, labelNames):
     from sklearn.metrics import confusion_matrix
@@ -168,7 +170,7 @@ def plot_histogram(outputs, histogram_name):
     plt.show()
 
 
-def plotConfusionMatrix(cm, class_names, title):
+def plotConfusionMatrix(cm, class_names, title, class_descriptions=None):
     plt.figure()
     plt.imshow(cm, interpolation='nearest', cmap='Blues')
     plt.title('Confusion Matrix ' + title)
@@ -187,5 +189,11 @@ def plotConfusionMatrix(cm, class_names, title):
     plt.ylabel('True label')
     plt.xlabel('Predicted label')
     plt.tight_layout()
+
+    if class_descriptions:
+        from matplotlib.lines import Line2D
+        legend_elements = [Line2D([0], [0], marker='o', color='w', label=f'{class_names[i]}: {desc}',
+                                  markerfacecolor='g', markersize=5) for i, desc in enumerate(class_descriptions)]
+        plt.legend(handles=legend_elements, bbox_to_anchor=(1.05, 1), loc='upper left')
 
     plt.show()

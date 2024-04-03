@@ -63,4 +63,9 @@ if __name__ == "__main__":
                              6, 7, 8,
                              9, 10, 11,
                              12, 13, 14,
-                             15], "fruit classification")
+                             15], "fruit classification", ['FreshApple', 'FreshBanana', 'FreshGrape', 'FreshGuava',
+                                                           'FreshJujube', 'FreshOrange',
+                                                           'FreshPomegranate', 'FreshStrawberry', 'RottenApple',
+                                                           'RottenBanana', 'RottenGrape', 'RottenGuava',
+                                                           'RottenJujube', 'RottenOrange', 'RottenPomegranate',
+                                                           'RottenStrawberry'])

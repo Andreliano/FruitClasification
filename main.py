@@ -2,12 +2,14 @@ import numpy as np
 from sklearn import neural_network
 
 from utils import describeDataset, loadImageData, split_data, plot_histogram, normalisation, \
-    convertPixelsMatrixIntoGrayScaleArray, training, classification, evalMultiClass, createModel, plotConfusionMatrix
+    convertPixelsMatrixIntoGrayScaleArray, training, classification, evalMultiClass, createModel, plotConfusionMatrix, \
+    createGoogleNetModel
 
 if __name__ == "__main__":
     inputs, outputs = loadImageData('dataset/Augmented Image')
-    inputs_transformed = convertPixelsMatrixIntoGrayScaleArray(inputs)
-    describeDataset(inputs_transformed, outputs)
+
+    # inputs_transformed = convertPixelsMatrixIntoGrayScaleArray(inputs)
+    # describeDataset(inputs_transformed, outputs)
     # plot_histogram(train_outputs, 'Histogram of labels for train inputs')
     # plot_histogram(test_outputs, 'Histogram of labels for test inputs')
 
@@ -32,13 +34,17 @@ if __name__ == "__main__":
     # print('precision: ', precision)
     # print('recall: ', recall)
 
+    output_labels = set(outputs)
     train_inputs, train_outputs, test_inputs, test_outputs = split_data(inputs, outputs)
     train_inputs = np.array(train_inputs)
     train_outputs = np.array(train_outputs)
-    model = createModel()
-    output_to_index = {label: i for i, label in enumerate(set(train_outputs))}
+    model = createGoogleNetModel()
+    output_labels = sorted(output_labels)
+    output_to_index = {label: i for i, label in enumerate(output_labels)}
+    print(output_to_index)
     index_train_outputs = [output_to_index[output] for output in train_outputs]
-    model.fit(train_inputs, np.array(index_train_outputs), epochs=10, batch_size=32)
+    print(train_inputs, np.array(index_train_outputs))
+    model.fit(train_inputs, np.array(index_train_outputs), epochs=15, batch_size=32)
 
     test_inputs = np.array(test_inputs)
     computed_test_outputs = model.predict(test_inputs)
@@ -63,9 +69,4 @@ if __name__ == "__main__":
                              6, 7, 8,
                              9, 10, 11,
                              12, 13, 14,
-                             15], "fruit classification", ['FreshApple', 'FreshBanana', 'FreshGrape', 'FreshGuava',
-                                                           'FreshJujube', 'FreshOrange',
-                                                           'FreshPomegranate', 'FreshStrawberry', 'RottenApple',
-                                                           'RottenBanana', 'RottenGrape', 'RottenGuava',
-                                                           'RottenJujube', 'RottenOrange', 'RottenPomegranate',
-                                                           'RottenStrawberry'])
+                             15], "fruit classification", output_labels)

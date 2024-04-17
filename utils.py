@@ -8,6 +8,12 @@ import os
 import tensorflow as tf
 from tensorflow import keras
 
+from tensorflow.keras.applications.inception_v3 import InceptionV3
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Dense, GlobalAveragePooling2D
+from tensorflow.keras.preprocessing.image import img_to_array
+from tensorflow.keras.applications.inception_v3 import preprocess_input
+
 from matplotlib import pyplot as plt
 
 
@@ -46,8 +52,9 @@ def loadImageData(path):
                 print(subdirectory, img_name)
                 imgNormal = Image.open(f'{path}/{subdirectory}/{img_name}')
                 imgNormal = imgNormal.resize((224, 224))
-                pixelMatrixNormal = np.array(imgNormal.getdata())
-                inputs.append(pixelMatrixNormal)
+                imgNormal = img_to_array(imgNormal)
+                imgNormal = preprocess_input(imgNormal)
+                inputs.append(imgNormal)
                 outputs.append(subdirectory)
 
     return inputs, outputs
@@ -132,6 +139,22 @@ def createModel():
     return model
 
 
+def createGoogleNetModel():
+    base_model = InceptionV3(weights='imagenet', include_top=False)
+
+    x = base_model.output
+    x = GlobalAveragePooling2D()(x)
+    x = Dense(1024, activation='relu')(x)
+    predictions = Dense(16, activation='softmax')(x)
+
+    model = Model(inputs=base_model.input, outputs=predictions)
+
+    for layer in base_model.layers:
+        layer.trainable = False
+
+    model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+    return model
+
 def training(classifier, trainInputsNormalized, trainOutputs):
     classifier.fit(trainInputsNormalized, trainOutputs)
     return classifier
@@ -194,6 +217,6 @@ def plotConfusionMatrix(cm, class_names, title, class_descriptions=None):
         from matplotlib.lines import Line2D
         legend_elements = [Line2D([0], [0], marker='o', color='w', label=f'{class_names[i]}: {desc}',
                                   markerfacecolor='g', markersize=5) for i, desc in enumerate(class_descriptions)]
-        plt.legend(handles=legend_elements, bbox_to_anchor=(1.05, 1), loc='upper left')
+        plt.legend(handles=legend_elements, bbox_to_anchor=(1.2, 1), loc='upper left')
 
     plt.show()

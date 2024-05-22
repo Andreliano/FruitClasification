@@ -13,6 +13,8 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Dense, GlobalAveragePooling2D
 from tensorflow.keras.preprocessing.image import img_to_array
 from tensorflow.keras.applications.inception_v3 import preprocess_input
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout, BatchNormalization
 
 from matplotlib import pyplot as plt
 
@@ -43,18 +45,33 @@ def describeDataset(inputs, outputs):
     print(description)
 
 
+# def loadImageData(path):
+#     inputs = []
+#     outputs = []
+#     for subdirectory in os.listdir(path):
+#         for img_name in os.listdir(f'{path}/{subdirectory}')[:5]:
+#             if img_name.endswith("jpg"):
+#                 print(subdirectory, img_name)
+#                 imgNormal = Image.open(f'{path}/{subdirectory}/{img_name}')
+#                 imgNormal = imgNormal.resize((224, 224))
+#                 imgNormal = img_to_array(imgNormal)
+#                 imgNormal = preprocess_input(imgNormal)
+#                 inputs.append(imgNormal)
+#                 outputs.append(subdirectory)
+#
+#     return inputs, outputs
+
 def loadImageData(path):
     inputs = []
     outputs = []
     for subdirectory in os.listdir(path):
-        for img_name in os.listdir(f'{path}/{subdirectory}')[:5]:
+        for img_name in os.listdir(f'{path}/{subdirectory}')[:10]:
             if img_name.endswith("jpg"):
                 print(subdirectory, img_name)
                 imgNormal = Image.open(f'{path}/{subdirectory}/{img_name}')
                 imgNormal = imgNormal.resize((224, 224))
-                imgNormal = img_to_array(imgNormal)
-                imgNormal = preprocess_input(imgNormal)
-                inputs.append(imgNormal)
+                pixelMatrixNormal = np.array(imgNormal.getdata())
+                inputs.append(pixelMatrixNormal)
                 outputs.append(subdirectory)
 
     return inputs, outputs
@@ -151,6 +168,37 @@ def createGoogleNetModel():
 
     for layer in base_model.layers:
         layer.trainable = False
+
+    model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+    return model
+
+
+def createAlexNetModel(input_shape, num_classes):
+    model = Sequential()
+
+
+    model.add(Conv2D(96, kernel_size=(11, 11), strides=4, activation='relu', input_shape=input_shape, padding='same'))
+    model.add(BatchNormalization())
+    model.add(MaxPooling2D(pool_size=(3, 3), strides=2))
+
+
+    model.add(Conv2D(256, kernel_size=(5, 5), activation='relu', padding='same'))
+    model.add(BatchNormalization())
+    model.add(MaxPooling2D(pool_size=(3, 3), strides=2))
+
+
+    model.add(Conv2D(384, kernel_size=(3, 3), activation='relu', padding='same'))
+    model.add(Conv2D(384, kernel_size=(3, 3), activation='relu', padding='same'))
+    model.add(Conv2D(256, kernel_size=(3, 3), activation='relu', padding='same'))
+    model.add(MaxPooling2D(pool_size=(3, 3), strides=2))
+
+
+    model.add(Flatten())
+    model.add(Dense(4096, activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(4096, activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(num_classes, activation='softmax'))
 
     model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
     return model

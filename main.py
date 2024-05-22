@@ -3,7 +3,7 @@ from sklearn import neural_network
 
 from utils import describeDataset, loadImageData, split_data, plot_histogram, normalisation, \
     convertPixelsMatrixIntoGrayScaleArray, training, classification, evalMultiClass, createModel, plotConfusionMatrix, \
-    createGoogleNetModel
+    createGoogleNetModel, createAlexNetModel
 
 if __name__ == "__main__":
     inputs, outputs = loadImageData('dataset/Augmented Image')
@@ -34,16 +34,49 @@ if __name__ == "__main__":
     # print('precision: ', precision)
     # print('recall: ', recall)
 
-    output_labels = set(outputs)
+    # output_labels = set(outputs)
+    # train_inputs, train_outputs, test_inputs, test_outputs = split_data(inputs, outputs)
+    # train_inputs = np.array(train_inputs)
+    # train_outputs = np.array(train_outputs)
+    # model = createAlexNetModel(input_shape=(224, 224, 3), num_classes=16)
+    # output_labels = sorted(output_labels)
+    # output_to_index = {label: i for i, label in enumerate(output_labels)}
+    # print(output_to_index)
+    # index_train_outputs = [output_to_index[output] for output in train_outputs]
+    # print(train_inputs, np.array(index_train_outputs))
+    # model.fit(train_inputs, np.array(index_train_outputs), epochs=10, batch_size=32)
+    #
+    # test_inputs = np.array(test_inputs)
+    # computed_test_outputs = model.predict(test_inputs)
+    # computed_test_outputs = np.argmax(computed_test_outputs, axis=1)
+    #
+    # output_to_index = {label: i for i, label in enumerate(set(test_outputs))}
+    # index_test_outputs = [output_to_index[output] for output in test_outputs]
+    # accuracy, precision, recall, cm = evalMultiClass(np.array(index_test_outputs), computed_test_outputs,
+    #                                                  [0, 1, 2, 3,
+    #                                                   4, 5,
+    #                                                   6, 7, 8,
+    #                                                   9, 10, 11,
+    #                                                   12, 13, 14,
+    #                                                   15])
+    #
+    # print("CNN image:")
+    # print('acc: ', accuracy)
+    # print('precision: ', precision)
+    # print('recall: ', recall)
+    # plotConfusionMatrix(cm, [0, 1, 2, 3,
+    #                          4, 5,
+    #                          6, 7, 8,
+    #                          9, 10, 11,
+    #                          12, 13, 14,
+    #                          15], "fruit classification", output_labels)
+
     train_inputs, train_outputs, test_inputs, test_outputs = split_data(inputs, outputs)
     train_inputs = np.array(train_inputs)
     train_outputs = np.array(train_outputs)
-    model = createGoogleNetModel()
-    output_labels = sorted(output_labels)
-    output_to_index = {label: i for i, label in enumerate(output_labels)}
-    print(output_to_index)
+    model = createModel()
+    output_to_index = {label: i for i, label in enumerate(set(train_outputs))}
     index_train_outputs = [output_to_index[output] for output in train_outputs]
-    print(train_inputs, np.array(index_train_outputs))
     model.fit(train_inputs, np.array(index_train_outputs), epochs=15, batch_size=32)
 
     test_inputs = np.array(test_inputs)
@@ -59,14 +92,8 @@ if __name__ == "__main__":
                                                       9, 10, 11,
                                                       12, 13, 14,
                                                       15])
-
+    model.save("fruit-classification-model.h5")
     print("CNN image:")
     print('acc: ', accuracy)
     print('precision: ', precision)
     print('recall: ', recall)
-    plotConfusionMatrix(cm, [0, 1, 2, 3,
-                             4, 5,
-                             6, 7, 8,
-                             9, 10, 11,
-                             12, 13, 14,
-                             15], "fruit classification", output_labels)

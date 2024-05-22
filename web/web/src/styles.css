@@ -1,0 +1,36 @@
+.title {
+    color: rgb(68, 68, 68);
+    font-size: 8rem;
+}
+
+.message {
+    color: rgb(68, 68, 68);
+    font-size: 2rem;
+}
+
+.page-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.check-button {
+    font-size: 2rem;
+    cursor: pointer;
+    border-radius: 30%;
+    border: 0.1rem solid rgb(49, 49, 49);
+    padding: 1rem 2rem;
+}
+
+.input-file {
+    font-size: 2rem;
+    border: 0.1rem solid rgb(49, 49, 49);
+    padding: 1rem 2rem;
+    margin-bottom: 3rem;
+}
+
+.response {
+    color: rgb(68, 68, 68);
+    font-size: 3rem;
+}
